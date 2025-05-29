@@ -3,7 +3,7 @@ name: CI - Train ML Model
 on:
   push:
     paths:
-      - 'MLProjectt/**'
+      - 'MLProject/**'
       - '.github/workflows/ci.yml'
 
 jobs:
@@ -18,7 +18,7 @@ jobs:
       uses: conda-incubator/setup-miniconda@v2
       with:
         activate-environment: mlflow-env
-        environment-file: MLProjectt/conda.yaml
+        environment-file: MLProject/conda.yaml
         auto-activate-base: false
 
     - name: Install MLflow
