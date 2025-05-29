@@ -12,10 +12,7 @@ from sklearn.preprocessing import LabelEncoder
 mlflow.set_tracking_uri("file:./mlruns")
 mlflow.set_experiment("ci-training")
 
-
-
 base_dir = os.path.dirname(os.path.abspath(__file__))
-
 
 csv_path = os.path.join(base_dir, "..", "preprocessing", "titanic_preprocessed_train.csv")
 
