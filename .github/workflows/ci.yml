@@ -28,4 +28,4 @@ jobs:
     - name: Run MLflow Project
       run: |
         cd MLProjectt
-        mlflow run . 
+        mlflow run . --no-conda --experiment-name "ci-training" --entry-point main
