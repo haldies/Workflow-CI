@@ -30,4 +30,4 @@ jobs:
       shell: bash -l {0} 
       run: |
         cd MLProject
-        mlflow run . 
+        python modelling.py
