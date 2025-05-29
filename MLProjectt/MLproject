@@ -1,4 +1,4 @@
-name: iris_modelling_project
+name: modelling_project
 
 conda_env: ./conda.yml
 

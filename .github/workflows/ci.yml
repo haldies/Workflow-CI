@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - 'MLProjectt/**'
-      - '.github/workflows/train-model.yml'
+      - '.github/workflows/ci.yml'
 
 jobs:
   build-train:
