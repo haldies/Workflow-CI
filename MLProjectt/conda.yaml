@@ -1,11 +1,11 @@
-name: iris_env
+name: mlflow-env
 channels:
   - defaults
 dependencies:
-  - python=3.9
+  - python=3.12.7
   - pip
   - pip:
       - pandas
       - scikit-learn
-      - mlflow
       - joblib
+      - mlflow==2.19.0
