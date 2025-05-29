@@ -3,6 +3,7 @@ FROM python:3.8-slim
 WORKDIR /app
 
 COPY conda.yaml ./
+
 RUN apt-get update && apt-get install -y wget bzip2 && \
     wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /miniconda.sh && \
     bash /miniconda.sh -b -p /opt/conda && \
@@ -14,4 +15,4 @@ ENV PATH=/opt/conda/envs/mlflow_env/bin:$PATH
 
 COPY . .
 
-CMD ["mlflow", "run", "."]
+CMD ["/opt/conda/bin/conda", "run", "-n", "mlflow_env", "mlflow", "run", "."]
