@@ -20,12 +20,8 @@ jobs:
         activate-environment: mlflow-env
         environment-file: MLProjectt/conda.yaml
         auto-activate-base: false
-
-    - name: Install MLflow
-      run: |
-        pip install mlflow
-
+        
     - name: Run MLflow Project
       run: |
         cd MLProjectt
-        mlflow run . --experiment-name ci-training --entry-point main
+        mlflow run . 
