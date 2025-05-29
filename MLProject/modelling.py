@@ -7,7 +7,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-
+import joblib
 
 mlflow.set_tracking_uri("file:./mlruns")
 mlflow.set_experiment("ci-training")
@@ -50,6 +50,8 @@ with mlflow.start_run():
     mlflow.log_metric("precision", precision)
     mlflow.log_metric("recall", recall)
     mlflow.log_metric("f1_score", f1)
+    
+    joblib.dump(model, "model.pkl")
 
     print(f"✅ Model dilatih dan dicatat di MLflow.")
     print(f"🔍 Akurasi: {accuracy:.4f}")

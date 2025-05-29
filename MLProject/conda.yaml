@@ -2,10 +2,13 @@ name: mlflow-env
 channels:
   - defaults
 dependencies:
-  - python=3.12.7
+  - python=3.9
   - pip
   - pip:
-      - pandas
+      - fastapi
+      - uvicorn
       - scikit-learn
       - joblib
+      - pandas
+      - numpy
       - mlflow==2.19.0
