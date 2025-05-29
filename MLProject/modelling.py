@@ -14,8 +14,8 @@ mlflow.set_experiment("ci-training")
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 
-csv_path = os.path.join(base_dir, "..", "preprocessing",
-                        "titanic_preprocessed_train.csv")
+csv_path = os.path.join(base_dir, "titanic_preprocessing", "titanic_preprocessed_train.csv")
+
 
 df = pd.read_csv(csv_path)
 
