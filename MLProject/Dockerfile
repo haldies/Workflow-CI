@@ -7,4 +7,4 @@ RUN conda env create -f conda.yaml
 
 COPY . .
 
-CMD ["conda", "run", "-n", "mlflow_env", "mlflow", "run", "."]
+CMD ["/bin/bash", "-c", "source activate mlflow_env && mlflow run ."]
