@@ -15,7 +15,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Build Docker image
-      run: docker build -t ml-training .
+      run: docker build -t ml-training ./MLProjectt
 
     - name: Run training in Docker
       run: docker run --rm ml-training
