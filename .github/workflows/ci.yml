@@ -14,20 +14,8 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Set up Miniconda
-      uses: conda-incubator/setup-miniconda@v2
-      with:
-        activate-environment: mlflow-env
-        environment-file: MLProjectt/conda.yaml
-        auto-activate-base: false
+    - name: Build Docker image
+      run: docker build -t ml-training .
 
-    - name: Install MLflow
-      shell: bash -l {0}  
-      run: |
-        pip install mlflow==2.19.0
-
-    - name: Run MLflow Project
-      shell: bash -l {0}  # Penting agar conda environment aktif
-      run: |
-        cd MLProjectt
-        mlflow run . 
+    - name: Run training in Docker
+      run: docker run --rm ml-training

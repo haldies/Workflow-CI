@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y wget bzip2 && \
     /opt/conda/bin/conda env create -f conda.yaml && \
     /opt/conda/bin/conda clean -afy
 
-ENV PATH=/opt/conda/envs/iris_env/bin:$PATH
+ENV PATH=/opt/conda/envs/mlflow_env/bin:$PATH
 
 COPY . .
 
