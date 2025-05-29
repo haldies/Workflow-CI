@@ -1,3 +1,5 @@
+import os
+
 import pandas as pd
 import mlflow
 import mlflow.sklearn
@@ -6,11 +8,20 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
-# Tambahan baris ini
+
 mlflow.set_tracking_uri("file:./mlruns")
 mlflow.set_experiment("ci-training")
 
-df = pd.read_csv("../preprocessing/titanic_preprocessed_train.csv")
+
+
+base_dir = os.path.dirname(os.path.abspath(__file__))
+
+
+csv_path = os.path.join(base_dir, "..", "preprocessing", "titanic_preprocessed_train.csv")
+
+df = pd.read_csv(csv_path)
+
+
 mlflow.sklearn.autolog()
 df = df.drop(columns=["Name", "Ticket", "Cabin", "PassengerId"], errors='ignore')
 
