@@ -1,27 +1,31 @@
-name: CI Model Retraining
+name: CI - Train ML Model
 
 on:
   push:
     paths:
-      - 'MLProject/**'
-  workflow_dispatch:
+      - 'MLProjectt/**'
+      - '.github/workflows/train-model.yml'
 
 jobs:
-  train-model:
+  build-train:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      - name: Build Docker Image
-        run: docker build -t my-mlflow-training ./MLProject
+    - name: Set up Miniconda
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        activate-environment: mlflow-env
+        environment-file: MLProjectt/conda.yaml
+        auto-activate-base: false
 
-      - name: Run Training Container
-        run: docker run --rm my-mlflow-training
+    - name: Install MLflow
+      run: |
+        pip install mlflow
 
-      - name: Upload mlruns artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: mlruns-artifact
-          path: mlruns/
+    - name: Run MLflow Project
+      run: |
+        cd MLProjectt
+        mlflow run .
