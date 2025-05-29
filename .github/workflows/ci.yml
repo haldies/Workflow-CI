@@ -3,7 +3,7 @@ name: CI - Train ML Model
 on:
   push:
     paths:
-      - 'MLProjectt/**'
+      - 'MLProject/**'
       - '.github/workflows/ci.yml'
 
 jobs:
@@ -15,7 +15,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Build Docker image
-      run: docker build -t ml-training ./MLProjectt
+      run: docker build -t ml-training ./MLProject
 
     - name: Run training in Docker
       run: docker run --rm ml-training
