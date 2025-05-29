@@ -1,6 +1,0 @@
-artifact_location: file:///D:/Program/Laskar%20Ai/course/machine_learning%20terakhir/Workflow-CI/MLProjectt/mlruns/623436102859997750
-creation_time: 1748529276103
-experiment_id: '623436102859997750'
-last_update_time: 1748529276103
-lifecycle_stage: active
-name: ci-training
