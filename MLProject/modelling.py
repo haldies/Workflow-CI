@@ -21,8 +21,7 @@ df = pd.read_csv(csv_path)
 
 
 mlflow.sklearn.autolog()
-df = df.drop(columns=["Name", "Ticket", "Cabin",
-             "PassengerId"], errors='ignore')
+df = df.drop(columns=["Name", "Ticket", "Cabin", "PassengerId", "Ticket_number", "Ticket_item"], errors='ignore')
 
 label_cols = df.select_dtypes(include='object').columns
 for col in label_cols:
@@ -31,6 +30,8 @@ for col in label_cols:
 
 X = df.drop(columns=["Survived"])
 y = df["Survived"]
+print("Fitur:", X.columns.tolist())
+print("Jumlah fitur:", X.shape[1])
 
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42)
