@@ -31,6 +31,17 @@ jobs:
           environment-file: MLProject/conda.yaml
           auto-activate-base: false
 
+      - name: Ensure mlruns is a clean directory
+        run: |
+          if [ -f "MLProject/mlruns" ]; then
+            echo "⚠️ 'mlruns' is a file. Removing it so MLflow can create a directory."
+            rm MLProject/mlruns
+          fi
+
+          if [ ! -d "MLProject/mlruns" ]; then
+            mkdir -p MLProject/mlruns
+          fi
+
       - name: Run MLflow Project
         shell: bash -l {0}
         run: |
@@ -58,7 +69,6 @@ jobs:
 
           RUN_ID=$(mlflow runs list --experiment-id $EXPERIMENT_ID --order-by attribute.start_time DESC --max-results 1 --output json | jq -r '.[0].info.run_id')
           echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
-       
 
       - name: Upload mlruns to artifact
         uses: actions/upload-artifact@v4
