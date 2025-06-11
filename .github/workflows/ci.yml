@@ -51,15 +51,8 @@ jobs:
 
       - name: Get latest MLflow run_id
         id: get_run_id
-        shell: bash -l {0}
         run: |
-          source /usr/share/miniconda/etc/profile.d/conda.sh
-          conda activate mlflow-env
-
-          export MLFLOW_TRACKING_URI=file:MLProject/mlruns
-
-          EXPERIMENT_ID=$(mlflow experiments search --view-type ACTIVE_ONLY --output json | jq -r '.[] | select(.name == "titanic_experiment") | .experiment_id')
-          echo "experiment_id=$EXPERIMENT_ID"
+          EXPERIMENT_ID=$(mlflow experiments list | grep titanic_experiment | awk '{print $1}')
           echo "experiment_id=$EXPERIMENT_ID" >> $GITHUB_OUTPUT
 
           RUN_ID=$(mlflow runs list --experiment-id $EXPERIMENT_ID --order-by attribute.start_time DESC --max-results 1 --output json | jq -r '.[0].info.run_id')
