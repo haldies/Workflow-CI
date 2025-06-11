@@ -3,68 +3,108 @@ name: CI - Train ML Model
 on:
   push:
     paths:
-      - 'MLProject/**'
-      - '.github/workflows/ci.yml'
+      - "MLProject/**"
+      - ".github/workflows/ci.yml"
 
 jobs:
   build-train:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Set up Python 3.12.7
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.12.7'
+      - name: Set up Python 3.12.7
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12.7"
 
-    - name: Check Env
-      run: |
-        python --version
-        pip --version
+      - name: Check Env
+        run: |
+          python --version
+          pip --version
 
-    - name: Set up Miniconda
-      uses: conda-incubator/setup-miniconda@v3
-      with:
-        activate-environment: mlflow-env
-        environment-file: MLProject/conda.yaml
-        auto-activate-base: false
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          activate-environment: mlflow-env
+          environment-file: MLProject/conda.yaml
+          auto-activate-base: false
 
-    - name: Run MLflow Project
-      shell: bash -l {0}
-      run: |
-        mlflow run MLProject
+      - name: Run MLflow Project
+        shell: bash -l {0}
+        run: |
+          mlflow run MLProject
+      - name: List MLflow run directories (debug)
+        run: |
+          echo "🗂  Listing contents of MLProject:"
+          ls -l MLProject || { echo "❌ Folder MLProject tidak ditemukan"; exit 1; }
 
-    - name: Get latest MLflow run_id
-      id: get_run_id
-      run: |
-        RUN_ID=$(ls -td MLProject/mlruns/0/* | head -n1 | xargs -n1 basename)
-        echo "Latest run ID: $RUN_ID"
-        echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+          echo "🔍 Checking for mlruns folder in MLProject:"
+          if [ -d "MLProject/mlruns" ]; then
+            echo "✅ 'mlruns' directory exists. Listing contents recursively:"
+            ls -R MLProject/mlruns
+          else
+            echo "⚠️ 'mlruns' directory not found. Mungkin MLflow belum membuat experiment/run?"
+          fi
 
-    - name: Upload mlruns to artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: mlruns
-        path: MLProject/mlruns/
+      - name: Get latest MLflow run_id
+        id: get_run_id
+        run: |
+          cd MLProject
+          export MLFLOW_TRACKING_URL=file:./mlruns
 
-    - name: Upload to Google Drive (optional)
-      if: false  # Ubah ke true dan tambahkan skrip jika kamu butuh
-      run: echo "Upload to Google Drive logic here..."
+          experiment_name="titanic_experiment"
 
-    - name: Build Docker Image from MLflow model
-      run: |
-        MODEL_PATH=MLProject/mlruns/0/${{ steps.get_run_id.outputs.run_id }}/artifacts/model
-        echo "Model path: $MODEL_PATH"
-        mlflow models build-docker -m $MODEL_PATH -n ${{ secrets.DOCKER_USERNAME }}/mlproject-image
+          experiment_id=$(ls -1 ./mlruns | grep -E '^[0-9]+$' | while read exp_id; do
+            if [ -f "./mlruns/$exp_id/meta.yaml" ]; then
+              exp_name=$(grep "^name:" "./mlruns/$exp_id/meta.yaml" | cut -d ':' -f2- | xargs)
+              if [ "$exp_name" = "$experiment_name" ]; then
+                echo $exp_id
+                break
+              fi
+            fi
+          done)
 
-    - name: Log in to Docker Hub
-      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+          if [ -z "$experiment_id" ]; then
+            echo "Experiment ID not found for '$experiment_name'"
+            exit 1
+          fi
 
-    - name: Tag Docker Image
-      run: |
-        docker tag ${{ secrets.DOCKER_USERNAME }}/mlproject-image ${{ secrets.DOCKER_USERNAME }}/mlproject-image:latest
+          echo "Found experiment_id: $experiment_id"
+          echo "experiment_id=$experiment_id" >> $GITHUB_ENV
 
-    - name: Push Docker Image
-      run: docker push ${{ secrets.DOCKER_USERNAME }}/mlproject-image:latest
+          run_id=$(ls -1t "./mlruns/$experiment_id" | grep -E '^[a-f0-9]{32}$' | head -n 1)
+          if [ -z "$run_id" ]; then
+            echo "Failed to get run_id"
+            exit 1
+          fi
+
+          echo "Latest run_id: $run_id"
+          echo "MLFLOW_RUN_ID=$run_id" >> $GITHUB_ENV
+
+      - name: Upload mlruns to artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlruns
+          path: MLProject/mlruns/${{ env.experiment_id }}/${{ env.MLFLOW_RUN_ID }}/artifacts
+
+      - name: Upload to Google Drive (optional)
+        if: false # Ubah ke true dan tambahkan skrip jika kamu butuh
+        run: echo "Upload to Google Drive logic here..."
+
+      - name: Build Docker Image from MLflow model
+        run: |
+          MODEL_PATH=MLProject/mlruns/0/${{ steps.get_run_id.outputs.run_id }}/artifacts/model
+          echo "Model path: $MODEL_PATH"
+          mlflow models build-docker -m $MODEL_PATH -n ${{ secrets.DOCKER_USERNAME }}/mlproject-image
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Tag Docker Image
+        run: |
+          docker tag ${{ secrets.DOCKER_USERNAME }}/mlproject-image ${{ secrets.DOCKER_USERNAME }}/mlproject-image:latest
+
+      - name: Push Docker Image
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/mlproject-image:latest
