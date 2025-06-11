@@ -37,7 +37,7 @@ jobs:
         cd MLProject
         export MLFLOW_TRACKING_URL=file:./mlruns
 
-        experiment_name="titanic Classification Non Tuning"
+        experiment_name="titanic_experiment"
 
         experiment_id=$(ls -1 ./mlruns | grep -E '^[0-9]+$' | while read exp_id; do
           if [ -f "./mlruns/$exp_id/meta.yaml" ]; then
