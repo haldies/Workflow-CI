@@ -58,7 +58,8 @@ jobs:
 
           export MLFLOW_TRACKING_URI=file:MLProject/mlruns
 
-          EXPERIMENT_ID=$(mlflow experiments list | grep titanic_experiment | awk '{print $1}')
+          EXPERIMENT_ID=$(mlflow experiments search --view-type ACTIVE_ONLY --output json | jq -r '.[] | select(.name == "titanic_experiment") | .experiment_id')
+          echo "experiment_id=$EXPERIMENT_ID"
           echo "experiment_id=$EXPERIMENT_ID" >> $GITHUB_OUTPUT
 
           RUN_ID=$(mlflow runs list --experiment-id $EXPERIMENT_ID --order-by attribute.start_time DESC --max-results 1 --output json | jq -r '.[0].info.run_id')
