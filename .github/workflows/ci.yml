@@ -14,39 +14,53 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Set up Miniconda
-      uses: conda-incubator/setup-miniconda@v3
+    - name: Set up Python 3.12.7
+      uses: actions/setup-python@v5
       with:
-        activate-environment: mlflow-env
-        environment-file: MLProject/conda.yaml
-        auto-activate-base: false
+        python-version: '3.12.7'
 
-    - name: Install MLflow
-      shell: bash -l {0}
+    - name: Check Env
+      run: |
+        python --version
+        pip --version
+
+    - name: Install dependencies
       run: |
         pip install mlflow==2.19.0
 
     - name: Run MLflow Project
-      shell: bash -l {0}
       run: |
         mlflow run MLProject
 
-    - name: Upload mlruns artifact
+    - name: Get latest MLflow run_id
+      id: get_run_id
+      run: |
+        RUN_ID=$(ls -td MLProject/mlruns/0/* | head -n1 | xargs -n1 basename)
+        echo "Latest run ID: $RUN_ID"
+        echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+
+    - name: Upload mlruns to artifact
       uses: actions/upload-artifact@v4
       with:
-        name: mlflow-runs
+        name: mlruns
         path: MLProject/mlruns/
+
+    - name: Upload to Google Drive (optional)
+      if: false  # Ubah ke true dan tambahkan skrip jika kamu butuh
+      run: echo "Upload to Google Drive logic here..."
+
+    - name: Build Docker Image from MLflow model
+      run: |
+        MODEL_PATH=MLProject/mlruns/0/${{ steps.get_run_id.outputs.run_id }}/artifacts/model
+        echo "Model path: $MODEL_PATH"
+        mlflow models build-docker -m $MODEL_PATH -n ${{ secrets.DOCKER_USERNAME }}/mlproject-image
 
     - name: Log in to Docker Hub
       run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-    - name: Build Docker image with MLflow
-      shell: bash -l {0}
+    - name: Tag Docker Image
       run: |
-        cd MLProject
-        latest_run_path=$(ls -td mlruns/0/* | head -1)
-        echo "Latest run path: $latest_run_path"
-        mlflow models build-docker -m $latest_run_path/artifacts/model -n ${{ secrets.DOCKER_USERNAME }}/mlproject-image
+        docker tag ${{ secrets.DOCKER_USERNAME }}/mlproject-image ${{ secrets.DOCKER_USERNAME }}/mlproject-image:latest
 
-    - name: Push Docker image
-      run: docker push ${{ secrets.DOCKER_USERNAME }}/mlproject-image
+    - name: Push Docker Image
+      run: docker push ${{ secrets.DOCKER_USERNAME }}/mlproject-image:latest
