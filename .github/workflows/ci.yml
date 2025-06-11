@@ -31,22 +31,12 @@ jobs:
           environment-file: MLProject/conda.yaml
           auto-activate-base: false
 
-      - name: Ensure mlruns is a clean directory
-        run: |
-          if [ -f "MLProject/mlruns" ]; then
-            echo "⚠️ 'mlruns' is a file. Removing it so MLflow can create a directory."
-            rm MLProject/mlruns
-          fi
-
-          if [ ! -d "MLProject/mlruns" ]; then
-            mkdir -p MLProject/mlruns
-          fi
+     
 
       - name: Run MLflow Project
         shell: bash -l {0}
         run: |
-          export MLFLOW_TRACKING_URI=file:MLProject/mlruns
-          mlflow run MLProject --experiment-name titanic_experiment
+          mlflow run MLProject 
 
       - name: List MLflow run directories (debug)
         run: |
