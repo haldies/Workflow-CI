@@ -34,7 +34,9 @@ jobs:
       - name: Run MLflow Project
         shell: bash -l {0}
         run: |
-          mlflow run MLProject
+          export MLFLOW_TRACKING_URI=file:MLProject/mlruns
+          mlflow run MLProject --experiment-name titanic_experiment
+
       - name: List MLflow run directories (debug)
         run: |
           echo "🗂  Listing contents of MLProject:"
@@ -51,37 +53,12 @@ jobs:
       - name: Get latest MLflow run_id
         id: get_run_id
         run: |
-          cd MLProject
-          export MLFLOW_TRACKING_URL=file:./mlruns
+          EXPERIMENT_ID=$(mlflow experiments list | grep titanic_experiment | awk '{print $1}')
+          echo "experiment_id=$EXPERIMENT_ID" >> $GITHUB_OUTPUT
 
-          experiment_name="titanic_experiment"
-
-          experiment_id=$(ls -1 ./mlruns | grep -E '^[0-9]+$' | while read exp_id; do
-            if [ -f "./mlruns/$exp_id/meta.yaml" ]; then
-              exp_name=$(grep "^name:" "./mlruns/$exp_id/meta.yaml" | cut -d ':' -f2- | xargs)
-              if [ "$exp_name" = "$experiment_name" ]; then
-                echo $exp_id
-                break
-              fi
-            fi
-          done)
-
-          if [ -z "$experiment_id" ]; then
-            echo "Experiment ID not found for '$experiment_name'"
-            exit 1
-          fi
-
-          echo "Found experiment_id: $experiment_id"
-          echo "experiment_id=$experiment_id" >> $GITHUB_ENV
-
-          run_id=$(ls -1t "./mlruns/$experiment_id" | grep -E '^[a-f0-9]{32}$' | head -n 1)
-          if [ -z "$run_id" ]; then
-            echo "Failed to get run_id"
-            exit 1
-          fi
-
-          echo "Latest run_id: $run_id"
-          echo "MLFLOW_RUN_ID=$run_id" >> $GITHUB_ENV
+          RUN_ID=$(mlflow runs list --experiment-id $EXPERIMENT_ID --order-by attribute.start_time DESC --max-results 1 --output json | jq -r '.[0].info.run_id')
+          echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+       
 
       - name: Upload mlruns to artifact
         uses: actions/upload-artifact@v4
