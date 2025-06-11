@@ -41,4 +41,3 @@ f1 = f1_score(y_test, y_pred)
 
 print(f"✅ Model dilatih dan dicatat di MLflow.")
 print(f"🔍 Akurasi: {accuracy:.4f}")
-print("run id:", mlflow.active_run().info.run_id)
