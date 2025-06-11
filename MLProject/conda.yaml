@@ -2,7 +2,7 @@ name: mlflow-env
 channels:
   - defaults
 dependencies:
-  - python=3.9
+  - Python 3.12.7
   - pip
   - pip:
       - fastapi

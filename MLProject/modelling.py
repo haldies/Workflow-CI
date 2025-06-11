@@ -1,5 +1,4 @@
 import os
-
 import pandas as pd
 import mlflow
 import mlflow.sklearn
@@ -9,7 +8,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 import joblib
 
-mlflow.set_tracking_uri("file:./mlruns")
+mlflow.set_tracking_uri("http://127.0.0.1:5000/")  
 mlflow.set_experiment("ci-training")
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
