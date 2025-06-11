@@ -31,8 +31,6 @@ jobs:
           environment-file: MLProject/conda.yaml
           auto-activate-base: false
 
-     
-
       - name: Run MLflow Project
         shell: bash -l {0}
         run: |
@@ -53,7 +51,13 @@ jobs:
 
       - name: Get latest MLflow run_id
         id: get_run_id
+        shell: bash -l {0}
         run: |
+          source /usr/share/miniconda/etc/profile.d/conda.sh
+          conda activate mlflow-env
+
+          export MLFLOW_TRACKING_URI=file:MLProject/mlruns
+
           EXPERIMENT_ID=$(mlflow experiments list | grep titanic_experiment | awk '{print $1}')
           echo "experiment_id=$EXPERIMENT_ID" >> $GITHUB_OUTPUT
 
@@ -71,7 +75,11 @@ jobs:
         run: echo "Upload to Google Drive logic here..."
 
       - name: Build Docker Image from MLflow model
+        shell: bash -l {0}
         run: |
+          source /usr/share/miniconda/etc/profile.d/conda.sh
+          conda activate mlflow-env
+
           MODEL_PATH=MLProject/mlruns/0/${{ steps.get_run_id.outputs.run_id }}/artifacts/model
           echo "Model path: $MODEL_PATH"
           mlflow models build-docker -m $MODEL_PATH -n ${{ secrets.DOCKER_USERNAME }}/mlproject-image
