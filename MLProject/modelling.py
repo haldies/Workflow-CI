@@ -11,6 +11,9 @@ from sklearn.preprocessing import LabelEncoder
 mlflow.sklearn.autolog()
 mlflow.set_experiment("titanic_experiment")
 base_dir = os.path.dirname(os.path.abspath(__file__))
+mlruns_path = os.path.join(base_dir, "mlruns")
+mlflow.set_tracking_uri(f"file://{mlruns_path}")
+base_dir = os.path.dirname(os.path.abspath(__file__))
 csv_path = os.path.join(base_dir, "titanic_preprocessing", "titanic_preprocessed_train.csv")
 
 df = pd.read_csv(csv_path)
