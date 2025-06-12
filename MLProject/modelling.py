@@ -14,9 +14,6 @@ csv_path = os.path.join(base_dir, "titanic_preprocessing", "titanic_preprocessed
 df = pd.read_csv(csv_path)
 
 mlflow.set_experiment("titanic_experiment")
-go_gc_duration_seconds
-go_gc_gogc_percent
-go_gc_gomemlimit
 
 label_cols = df.select_dtypes(include='object').columns
 for col in label_cols:
