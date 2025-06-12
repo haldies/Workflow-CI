@@ -1,0 +1,15 @@
+artifact_uri: file:///D:/Program/Laskar%20Ai/course/machine_learning%20terakhir/Workflow-CI/MLProject/mlruns/0/7fd23a7cc7724f86bc67d00fdf3bb1e3/artifacts
+end_time: 1749711631426
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 7fd23a7cc7724f86bc67d00fdf3bb1e3
+run_name: indecisive-cat-383
+run_uuid: 7fd23a7cc7724f86bc67d00fdf3bb1e3
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1749711589785
+status: 3
+tags: []
+user_id: haldies
