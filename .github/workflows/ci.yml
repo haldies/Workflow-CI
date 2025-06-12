@@ -26,35 +26,19 @@ jobs:
     - name: Install dependencies
       run: pip install -r MLProject/requirements.txt
 
-    - name: Run mlflow project
+    - name: Run MLflow project
       run: |
         cd MLProject
-        python modelling.py
+        export MLFLOW_TRACKING_URI=file:./mlruns
+        mlflow run . --env-manager=local
 
     - name: Get latest MLflow run_id
       id: get_run_id
       run: |
         cd MLProject
-        export MLFLOW_TRACKING_URL=file:./mlruns
+        export MLFLOW_TRACKING_URI=file:./mlruns
 
-        experiment_name="titanic_experiment"
-
-        experiment_id=$(ls -1 ./mlruns | grep -E '^[0-9]+$' | while read exp_id; do
-          if [ -f "./mlruns/$exp_id/meta.yaml" ]; then
-            exp_name=$(grep "^name:" "./mlruns/$exp_id/meta.yaml" | cut -d ':' -f2- | xargs)
-            if [ "$exp_name" = "$experiment_name" ]; then
-              echo $exp_id
-              break
-            fi
-          fi
-        done)
-
-        if [ -z "$experiment_id" ]; then
-          echo "Experiment ID not found for '$experiment_name'"
-          exit 1
-        fi
-
-        echo "Found experiment_id: $experiment_id"
+        experiment_id=0
         echo "experiment_id=$experiment_id" >> $GITHUB_ENV
 
         run_id=$(ls -1t "./mlruns/$experiment_id" | grep -E '^[a-f0-9]{32}$' | head -n 1)
@@ -66,7 +50,7 @@ jobs:
         echo "Latest run_id: $run_id"
         echo "MLFLOW_RUN_ID=$run_id" >> $GITHUB_ENV
 
-    - name: Install additional python dependencies
+    - name: Install additional dependencies (e.g., requests)
       run: pip install requests
 
     - name: Upload MLflow artifacts
@@ -75,9 +59,10 @@ jobs:
         name: mlartifacts
         path: MLProject/mlruns/${{ env.experiment_id }}/${{ env.MLFLOW_RUN_ID }}/artifacts
 
-    - name: Build Docker Model
+    - name: Build Docker model
       run: |
         cd MLProject
+        export MLFLOW_TRACKING_URI=file:./mlruns
         mlflow models build-docker -m "runs:/${{ env.MLFLOW_RUN_ID }}/model" -n titanic-image
 
     - name: Log in to Docker Hub
@@ -89,5 +74,5 @@ jobs:
     - name: Push Docker Image
       run: docker push ${{ secrets.DOCKER_USERNAME }}/titanic-image:latest
 
-    - name: Log out Docker Hub
+    - name: Log out from Docker Hub
       run: docker logout
